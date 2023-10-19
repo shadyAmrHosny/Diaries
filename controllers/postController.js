@@ -1,8 +1,9 @@
-const Post=require('./../models/postModel')
+const Post=require('./../models/postModel');
 const APIFeatures = require('./../utils/apiFeatures');
+const catchAsync = require('./../utils/catchAsync');
+const appError= require('./../utils/AppError');
 
-exports.creatPost=async (req,res)=>{
-    try {
+exports.creatPost=catchAsync(async (req,res)=>{
         console.log(req.body)
         const newPost = await Post.create(req.body);
 
@@ -12,15 +13,8 @@ exports.creatPost=async (req,res)=>{
                 post: newPost
             }
         })
-    }catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err
-        });
-    }
-}
-exports.getAllPosts=async(req,res)=>{
-    try {
+});
+exports.getAllPosts=catchAsync(async(req,res,next)=> {
         // EXECUTE QUERY
         const features = new APIFeatures(Post.find(), req.query)
             .sort()
@@ -35,60 +29,44 @@ exports.getAllPosts=async(req,res)=>{
                 posts
             }
         });
-    } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err
+});
+exports.getPost=catchAsync(async(req,res,next)=>{
+        const post=await Post.findById(req.params.id)
+        if (!post){
+            return next(new appError('NO POST  FOUND WITH THAT ID',404));
+        }
+        res.status(200).json({
+            status: 'success',
+            data: {
+               post
+            }
         });
-    }
-exports.getPost=async (req,res)=>{
-        try {
-            const post=await Post.findById(req.params.id);
-            res.status(200).json({
-                status :'success',
-                data :{
-                    post
-                }
-            })
-        }catch (err){
-            res.status(400).json({
-                status: 'fail',
-                message: err
-            });
-        }
-}
-exports.updatePost= async (req,res)=>{
-        try {
-            const modifiedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
-                new: true,
-                runValidators: true
-            });
-            res.status(200).json({
-                status: 'success',
-                data: {
-                    modifiedPost
-                }
-            });
-        }catch (err) {
-            res.status(404).json({
-                status: 'fail',
-                message: err
-            });
-        }
-}
-exports.deletePost=async (req,res)=>{
-        try {
-            await Post.findByIdAndDelete(req.params.id);
-            res.status(204).json({
-                status: 'success',
-                data: null
-            });
-        } catch (err) {
-            res.status(404).json({
-                status: 'fail',
-                message: err
-            });
-        }
-};
+})
 
-}
+exports.updatePost=catchAsync( async (req,res,next)=>{
+        const modifiedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+        if (!modifiedPost){
+            return next(new appError('NO POST  FOUND WITH THAT ID',404));
+        }
+        res.status(200).json({
+            status: 'success',
+            data: {
+                modifiedPost
+            }
+        });
+});
+
+exports.deletePost=catchAsync(async (req,res,next)=>{
+        const post= await Post.findByIdAndDelete(req.params.id);
+        if (!post){
+            return next(new appError('NO POST  FOUND WITH THAT ID',404));
+         }
+        res.status(204).json({
+            status: 'success',
+            data: null
+        });
+
+});

@@ -11,10 +11,7 @@ router
     .route('/:id')
     .get(postController.getPost)
     .patch(postController.updatePost)
-    .delete(postController.deletePost);
-
-
-
+    .delete(postController.deletePost)
 
 
 

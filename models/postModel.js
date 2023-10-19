@@ -5,7 +5,7 @@ const postSchema=new mongoose.Schema({
     text:{
         type: String,
         required: [true, 'A POST MUST HAVE A TEXT'],
-       // minlength:1,
+        // minlength:1,
         maxlength:3200
     },
     createdAt:{

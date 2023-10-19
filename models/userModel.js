@@ -5,11 +5,16 @@ const userSchema=new mongoose.Schema({
     name:{
         type:String,
         required:[true,'USER MUST HAVE A NAME'],
-        minlength:3
+        minlength:3,
+        validate:[validator.isAlpha, 'NAME MUST ONLY CONTAIN CHARACTERS']
     },
     gender:{
         type:String,
-        enum: ['male','female'],
+        required:true,
+        enum:{
+          values: ['male','female'],
+            message: 'GENDER IS EITHER: MALE OR FEMALE'
+        }
     },
     birthdate: {
         type: Date,
